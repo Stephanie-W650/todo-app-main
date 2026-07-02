@@ -2,82 +2,142 @@ import { useState } from "react";
 
 
 export default function App() {
-const [input, setInput] = useState("")
-const [todos, setTodos] = useState([])
+  const [input, setInput] = useState("")
+  const [todos, setTodos] = useState([])
+  const [filter, setFilter] = useState("All")
 
-function handleChange(e) {
-  setInput(e.target.value)
-}
+  function handleChange(e) {
+    setInput(e.target.value)
+  }
 
-function handleClick() {
-  
-  if (input.trim() === "") return;
+  function handleClick() {
 
-  setTodos([
-    ...todos,
-    {
-      id: Date.now(),
-      text: input,
-      completed: false
+    if (input.trim() === "") return;
 
-    }])
-setInput("")
-  console.log(todos)
-}
+    setTodos([
+      ...todos,
+      {
+        id: Date.now(),
+        text: input,
+        completed: false
 
-
-function handleDelete(id) {
-  setTodos(todos.filter(
-    todo => todo.id != id
-  ))
+      }])
+    setInput("")
+    console.log(todos)
+  }
 
 
-}
+  function handleDelete(id) {
+    setTodos(todos.filter(
+      todo => todo.id != id
+    ))
 
-function handleToggle(id) {
-  setTodos(
-    todos.map(
-      todo => todo.id === id ? {...todo, completed: !todo.completed} : todo
+
+  }
+
+  function handleToggle(id) {
+    setTodos(
+      todos.map(
+        todo => todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
     )
+  }
+
+  const filteredTodo = todos.filter(
+    todo => {
+      if (filter === "All") return true;
+      if (filter === "Active") return !todo.completed;
+      if (filter === "Completed") return todo.completed
+
+      return false;
+    }
+
+
   )
-}
+
+  const activeCount = todos
+    .filter(todo => !todo.completed)
+    .length
 
 
   return (
     <div>
       <h1>Todo App</h1>
 
-      <input type="text" 
-      value={ input } 
-      onChange={ handleChange } 
-      placeholder="Enter todo"/>
+      <input type="text"
+        value={input}
+        onChange={handleChange}
+        placeholder="Enter todo" />
 
       <button onClick={(handleClick)}>
         Add
       </button>
-     <ul>
-      {
-        todos.map((todo) => (
-          <li key={todo.id}
-          onClick ={() => handleToggle(todo.id)}
-        style = {
-          {
-            textDecoration: todo.completed ? "line-through" : "none"
-          }
+
+      <div>
+
+        <button onClick={() => setFilter("All")}
+          style={{
+            fontWeight: filter === "All" ? "bold" : "normal",
+            color: filter === "All" ? "blue" : "black"
+          }}
+        >
+          ALL
+        </button>
+
+        <button onClick={() => setFilter("Active")}
+          style={{
+            fontWeight: filter === "Active" ? "bold" : "normal",
+            color: filter === "Active" ? "blue" : "black"
+          }}
+        >
+          Active
+        </button>
+
+        <button onClick={() => setFilter("Completed")}
+          style={{
+            fontWeight: filter === "Completed" ? "bold" : "normal",
+            color: filter === "Completed" ? "blue" : "black"
+          }}
+        >
+          Completed
+        </button>
+
+        <button onClick={() => setTodos(todos.filter(todo => !todo.completed))}
+          style={{
+            fontWeight: filter
+          }}
+        >
+          Clear Completed
+        </button>
+
+      </div>
+
+      <p>{activeCount} items left</p>
+
+      <ul>
+        {
+          filteredTodo.map((todo) => (
+            <li key={todo.id}
+              onClick={() => handleToggle(todo.id)}
+              style={
+                {
+                  textDecoration: todo.completed ? "line-through" : "none"
+                }
+              }
+            >
+              {todo.text}
+
+              <button onClick={(e) => {
+                e.stopPropagation()
+                (handleDelete(todo.id))
+              }}>
+                Delete
+              </button>
+
+            </li>
+          ))
         }
-         >
-            {todo.text}
-
-            <button onClick={(e) => 
-            { e.stopPropagation()
-              (handleDelete(todo.id))}}>
-                  Delete
-            </button>
-
-          </li>
-        ))
-      }
-     </ul>
+      </ul>
 
     </div>
   )
