@@ -1,10 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
 export default function App() {
   const [input, setInput] = useState("")
-  const [todos, setTodos] = useState([])
+  //const [todos, setTodos] = useState([])
+ 
+ const [todos, setTodos] = useState(() => {
+  const saved = localStorage.getItem("todos")
+  if (!saved) return []
+
+  try {
+    return JSON.parse(saved)
+  } catch (error) {
+    return []
+  }
+ }
+
+ )
+
   const [filter, setFilter] = useState("All")
+
+ useEffect(() => {
+  localStorage.setItem("todos", JSON.stringify(todos))
+ }, [todos]
+
+ )
 
   function handleChange(e) {
     setInput(e.target.value)
@@ -59,6 +79,11 @@ export default function App() {
     .filter(todo => !todo.completed)
     .length
 
+function handleKeyDown(e) {
+  if (e.key === "enter") {
+    handleClick
+  }
+}
 
   return (
     <div>
@@ -67,9 +92,11 @@ export default function App() {
       <input type="text"
         value={input}
         onChange={handleChange}
-        placeholder="Enter todo" />
+        placeholder="Enter todo" 
+        onKeyDown={handleKeyDown}
+        />
 
-      <button onClick={(handleClick)}>
+      <button onClick={handleClick}>
         Add
       </button>
 
@@ -103,9 +130,7 @@ export default function App() {
         </button>
 
         <button onClick={() => setTodos(todos.filter(todo => !todo.completed))}
-          style={{
-            fontWeight: filter
-          }}
+          
         >
           Clear Completed
         </button>
@@ -129,7 +154,7 @@ export default function App() {
 
               <button onClick={(e) => {
                 e.stopPropagation()
-                (handleDelete(todo.id))
+                handleDelete(todo.id)
               }}>
                 Delete
               </button>
